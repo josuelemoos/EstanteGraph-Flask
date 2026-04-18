@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Bookshelf · Detalhe{% endblock %}
+{% block body_class %}body-detail{% endblock %}
+{% block content %}
+<div class="page-detail" id="page-detail" data-book-id="{{ book_id }}">
+    <a href="/" class="back-link">← estante</a>
+
+    <div class="detail-layout">
+        <div class="detail-sidebar">
+            <div class="detail-cover" id="detail-cover"></div>
+            <div class="detail-actions">
+                <button class="btn-secondary" id="btn-edit" type="button">editar</button>
+                <button class="btn-danger" id="btn-delete" type="button">remover</button>
+                <a class="btn-secondary" href="/graph?focus={{ book_id }}">ver no grafo</a>
+            </div>
+        </div>
+
+        <div class="detail-main">
+            <p class="eyebrow">ficha do livro</p>
+            <h1 id="detail-title">Carregando...</h1>
+            <div class="detail-author" id="detail-author"></div>
+            <div class="detail-stars" id="detail-stars"></div>
+
+            <div class="detail-status" id="detail-status">
+                <select id="status-select" onchange="updateStatus(this.value)">
+                    <option value="want">quero ler</option>
+                    <option value="reading">lendo</option>
+                    <option value="read">lido</option>
+                </select>
+            </div>
+
+            <div class="detail-meta-line" id="detail-meta-line"></div>
+            <div class="detail-genres" id="detail-genres"></div>
+            <div class="detail-tags" id="detail-tags"></div>
+
+            <div class="detail-review hidden" id="detail-review"></div>
+        </div>
+    </div>
+
+    <section class="connections-section">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">ecos e afinidades</p>
+                <h2>livros conectados</h2>
+            </div>
+            <button class="btn-secondary" id="btn-add-connection" type="button">+ conectar livro</button>
+        </div>
+        <div class="connections-list" id="connections-list"></div>
+        <div class="empty-inline hidden" id="connections-empty">Nenhuma conexão ainda. Crie a primeira ligação manual.</div>
+    </section>
+</div>
+
+<div id="modal-connection" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-sm">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">conexão manual</p>
+                <h3>Conectar a outro livro</h3>
+            </div>
+            <button class="modal-close" type="button" onclick="closeConnectionModal()" aria-label="Fechar">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="conn-search">Livro</label>
+                <input type="text" id="conn-search" placeholder="buscar título...">
+                <div id="conn-results" class="autocomplete-results"></div>
+            </div>
+            <div class="form-group">
+                <label for="conn-note">Nota (opcional)</label>
+                <input type="text" id="conn-note" placeholder="por que esses livros se conectam?">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" type="button" onclick="closeConnectionModal()">Cancelar</button>
+            <button class="btn-primary" type="button" onclick="saveConnection()">Conectar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

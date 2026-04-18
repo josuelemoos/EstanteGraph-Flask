@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bookshelf{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <div class="page-shell"></div>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Bookshelf</a>
+        <div class="navbar-links">
+            <a href="/" class="{{ 'active' if request.path == '/' else '' }}">estante</a>
+            <a href="/graph" class="{{ 'active' if request.path == '/graph' else '' }}">grafo 3D</a>
+            <a href="#" id="btn-add-book" class="btn-primary">+ livro</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <div id="modal-book" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">catalogo</p>
+                    <h2 id="modal-title">Adicionar livro</h2>
+                </div>
+                <button class="modal-close" id="btn-modal-close" type="button" aria-label="Fechar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="book-title">Título *</label>
+                    <input type="text" id="book-title" placeholder="ex: Duna">
+                </div>
+                <div class="form-group">
+                    <label for="book-author">Autor *</label>
+                    <input type="text" id="book-author" placeholder="ex: Frank Herbert">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="book-year">Ano</label>
+                        <input type="number" id="book-year" placeholder="1965">
+                    </div>
+                    <div class="form-group">
+                        <label for="book-isbn">ISBN</label>
+                        <input type="text" id="book-isbn" placeholder="978-...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="book-cover">URL da capa</label>
+                    <input type="url" id="book-cover" placeholder="https://...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="book-status">Status</label>
+                        <select id="book-status">
+                            <option value="want">quero ler</option>
+                            <option value="reading">lendo</option>
+                            <option value="read">lido</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Avaliação</label>
+                        <div class="star-input" id="star-input"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Gêneros</label>
+                    <div id="genre-checkboxes" class="checkbox-group"></div>
+                </div>
+                <div class="form-group">
+                    <label for="book-tags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="book-tags" placeholder="favorito, clássico">
+                </div>
+                <div class="form-group">
+                    <label for="book-review">Resenha</label>
+                    <textarea id="book-review" rows="4" placeholder="sua opinião sobre o livro..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-modal-cancel" class="btn-secondary" type="button">Cancelar</button>
+                <button id="btn-modal-save" class="btn-primary" type="button">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

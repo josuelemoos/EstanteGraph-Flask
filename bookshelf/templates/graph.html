@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Bookshelf · Grafo 3D{% endblock %}
+{% block body_class %}body-graph{% endblock %}
+{% block extra_head %}
+<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+<script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="graph-page" data-focus="{{ focus or '' }}">
+    <div id="graph-controls">
+        <div class="controls-panel">
+            <h3>filtros</h3>
+
+            <label class="control-row">
+                <input type="checkbox" id="show-genre" checked>
+                <span class="edge-line edge-genre"></span>
+                conexões por gênero
+            </label>
+
+            <label class="control-row">
+                <input type="checkbox" id="show-tag" checked>
+                <span class="edge-line edge-tag"></span>
+                conexões por tag
+            </label>
+
+            <label class="control-row">
+                <input type="checkbox" id="show-manual" checked>
+                <span class="edge-line edge-manual"></span>
+                conexões manuais
+            </label>
+
+            <hr>
+
+            <label class="control-row control-column">
+                <span>gênero</span>
+                <select id="filter-genre">
+                    <option value="">todos</option>
+                </select>
+            </label>
+
+            <hr>
+
+            <div class="legend">
+                <div id="legend-genres"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="graph-container"></div>
+
+    <div id="node-tooltip" class="hidden">
+        <div id="tt-title"></div>
+        <div id="tt-author"></div>
+        <div id="tt-rating"></div>
+        <div id="tt-genres"></div>
+    </div>
+
+    <aside id="node-panel" class="hidden">
+        <button id="panel-close" type="button">×</button>
+        <div id="panel-cover"></div>
+        <div id="panel-title"></div>
+        <div id="panel-author"></div>
+        <div id="panel-rating"></div>
+        <div id="panel-status"></div>
+        <div id="panel-genres"></div>
+        <div id="panel-tags"></div>
+        <div id="panel-review"></div>
+        <a id="panel-link" href="#">ver detalhes completos →</a>
+    </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='graph.js') }}"></script>
+{% endblock %}

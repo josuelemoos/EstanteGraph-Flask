@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Bookshelf · Estante{% endblock %}
+{% block body_class %}body-dashboard{% endblock %}
+{% block content %}
+<div class="page-dashboard">
+    <section class="hero-panel">
+        <div>
+            <p class="eyebrow">estante viva</p>
+            <h1>Seu mapa de leituras, notas e conexões entre livros.</h1>
+        </div>
+        <p class="hero-copy">
+            Organize o que você quer ler, acompanhe leituras em andamento e prepare terreno para explorar tudo no grafo 3D.
+        </p>
+    </section>
+
+    <div class="stats-bar" id="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-label">livros</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-read">—</div>
+            <div class="stat-label">lidos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-rating">—</div>
+            <div class="stat-label">média</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-connections">—</div>
+            <div class="stat-label">conexões</div>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <input type="search" id="search-input" placeholder="buscar título, autor...">
+        <div class="filter-pills">
+            <button class="pill active" data-status="">todos</button>
+            <button class="pill" data-status="want">quero ler</button>
+            <button class="pill" data-status="reading">lendo</button>
+            <button class="pill" data-status="read">lidos</button>
+        </div>
+        <select id="filter-genre-select">
+            <option value="">todos os gêneros</option>
+        </select>
+    </div>
+
+    <div class="books-grid" id="books-grid"></div>
+
+    <div class="empty-state hidden" id="empty-state">
+        <p>Nenhum livro encontrado.</p>
+        <button class="btn-primary" id="btn-empty-add" type="button">adicionar o primeiro livro</button>
+    </div>
+</div>
+{% endblock %}
