@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlencode
+from urllib.request import Request, urlopen
 
 from flask import Blueprint, request
 from sqlalchemy import or_
@@ -26,6 +30,11 @@ DETAIL_LOAD_OPTIONS = (
     selectinload(Book.connections_as_a).joinedload(Connection.book_b),
     selectinload(Book.connections_as_b).joinedload(Connection.book_a),
 )
+
+WIKIPEDIA_LANGUAGES = ("pt", "en")
+WIKIPEDIA_HEADERS = {
+    "User-Agent": "BookshelfApp/1.0 (https://example.local)"
+}
 
 
 def _parse_integer(value: Any, field_name: str) -> tuple[int | None, str | None]:
@@ -239,6 +248,127 @@ def _get_book_or_404(book_id: int) -> Book | None:
     )
 
 
+def _fetch_json(url: str) -> dict | list | None:
+    """Busca um JSON remoto com timeout curto e falha silenciosa."""
+
+    request_object = Request(url, headers=WIKIPEDIA_HEADERS)
+
+    try:
+        with urlopen(request_object, timeout=4) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+        return None
+
+
+def _search_wikipedia_page(search_term: str, language: str) -> str | None:
+    """Busca o primeiro titulo de pagina para um termo na Wikipedia."""
+
+    params = urlencode(
+        {
+            "action": "query",
+            "list": "search",
+            "srsearch": search_term,
+            "utf8": 1,
+            "format": "json",
+            "srlimit": 1,
+        }
+    )
+    payload = _fetch_json(f"https://{language}.wikipedia.org/w/api.php?{params}")
+
+    if not isinstance(payload, dict):
+        return None
+
+    results = payload.get("query", {}).get("search", [])
+    if not results:
+        return None
+
+    first_result = results[0]
+    return normalize_text(first_result.get("title"))
+
+
+def _fetch_wikipedia_summary_by_title(page_title: str, language: str) -> dict | None:
+    """Busca o resumo de uma pagina da Wikipedia a partir do titulo."""
+
+    payload = _fetch_json(
+        f"https://{language}.wikipedia.org/api/rest_v1/page/summary/{quote(page_title, safe='')}"
+    )
+
+    if not isinstance(payload, dict):
+        return None
+
+    extract = normalize_text(payload.get("extract"))
+    summary_title = normalize_text(payload.get("title"))
+    page_url = normalize_text(
+        payload.get("content_urls", {})
+        .get("desktop", {})
+        .get("page")
+    )
+
+    if not extract or not summary_title:
+        return None
+
+    return {
+        "title": summary_title,
+        "extract": extract,
+        "url": page_url,
+        "language": language,
+    }
+
+
+def _fetch_wikipedia_summary(search_terms: list[str]) -> dict | None:
+    """Busca um resumo relevante na Wikipedia tentando varios termos e idiomas."""
+
+    normalized_terms = []
+    seen_terms: set[str] = set()
+
+    for raw_term in search_terms:
+        term = normalize_text(raw_term)
+        if not term:
+            continue
+        lowered = term.lower()
+        if lowered in seen_terms:
+            continue
+        seen_terms.add(lowered)
+        normalized_terms.append(term)
+
+    for language in WIKIPEDIA_LANGUAGES:
+        for term in normalized_terms:
+            page_title = _search_wikipedia_page(term, language)
+            if not page_title:
+                continue
+
+            summary = _fetch_wikipedia_summary_by_title(page_title, language)
+            if summary:
+                return summary
+
+    return None
+
+
+def _book_context_payload(book: Book) -> dict[str, Any]:
+    """Monta o contexto externo do livro e do autor via Wikipedia."""
+
+    book_summary = _fetch_wikipedia_summary(
+        [
+            f'{book.title} livro "{book.author}"',
+            f"{book.title} livro",
+            f"{book.title} romance",
+            book.title,
+        ]
+    )
+    author_summary = _fetch_wikipedia_summary(
+        [
+            f"{book.author} escritor",
+            f"{book.author} author",
+            book.author,
+        ]
+    )
+
+    return {
+        "book": book_summary,
+        "author": author_summary,
+    }
+
+
 @books_bp.get("/books")
 def list_books():
     """Lista livros com filtros e ordenacao opcionais."""
@@ -329,6 +459,17 @@ def get_book(book_id: int):
         return error_response("Livro nao encontrado", 404)
 
     return success_response(_book_detail_payload(book))
+
+
+@books_bp.get("/books/<int:book_id>/context")
+def get_book_context(book_id: int):
+    """Retorna contexto externo do livro e do autor."""
+
+    book = db.session.get(Book, book_id)
+    if book is None:
+        return error_response("Livro nao encontrado", 404)
+
+    return success_response(_book_context_payload(book))
 
 
 @books_bp.put("/books/<int:book_id>")

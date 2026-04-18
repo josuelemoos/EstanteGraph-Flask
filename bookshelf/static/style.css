@@ -528,6 +528,53 @@ textarea {
     padding: 24px;
 }
 
+.context-section {
+    margin-top: 28px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--surface) 94%, var(--surface-2));
+    box-shadow: var(--shadow);
+}
+
+.context-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.context-card {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+}
+
+.context-card h3 {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+}
+
+.context-loading,
+.context-empty,
+.context-text {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.context-title {
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.context-link {
+    display: inline-flex;
+    margin-top: 12px;
+    color: var(--blue);
+    font-weight: 700;
+}
+
 .section-header {
     display: flex;
     align-items: end;
@@ -833,7 +880,8 @@ textarea {
     .hero-panel,
     .detail-layout,
     .filters-bar,
-    .stats-bar {
+    .stats-bar,
+    .context-grid {
         grid-template-columns: 1fr;
     }
 

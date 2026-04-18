@@ -404,6 +404,7 @@ async function loadBookDetail(bookId) {
         const book = await apiRequest(`/api/books/${bookId}`)
         appState.detail.book = book
         renderBookDetail(book)
+        loadBookContext(book.id)
     } catch (error) {
         showToast(error.message, "error")
         document.getElementById("page-detail").innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`
@@ -467,6 +468,65 @@ function renderConnections(connections) {
             </div>
         </article>
     `).join("")
+}
+
+async function loadBookContext(bookId) {
+    setContextLoadingState("book", true)
+    setContextLoadingState("author", true)
+
+    try {
+        const context = await apiRequest(`/api/books/${bookId}/context`)
+        renderContextCard("book", context.book, "Nenhum resumo encontrado para este livro.")
+        renderContextCard("author", context.author, "Nenhum resumo encontrado para este autor.")
+    } catch (error) {
+        setContextLoadingState("book", false)
+        setContextLoadingState("author", false)
+        renderContextCard("book", null, "Nao foi possivel carregar o resumo do livro agora.")
+        renderContextCard("author", null, "Nao foi possivel carregar o resumo do autor agora.")
+    }
+}
+
+function setContextLoadingState(prefix, isLoading) {
+    document.getElementById(`${prefix}-context-loading`)?.classList.toggle("hidden", !isLoading)
+    document.getElementById(`${prefix}-context-empty`)?.classList.add("hidden")
+    document.getElementById(`${prefix}-context-content`)?.classList.add("hidden")
+}
+
+function renderContextCard(prefix, summary, emptyMessage) {
+    const loading = document.getElementById(`${prefix}-context-loading`)
+    const empty = document.getElementById(`${prefix}-context-empty`)
+    const content = document.getElementById(`${prefix}-context-content`)
+    const title = document.getElementById(`${prefix}-context-title`)
+    const text = document.getElementById(`${prefix}-context-text`)
+    const link = document.getElementById(`${prefix}-context-link`)
+
+    loading?.classList.add("hidden")
+
+    if (!summary) {
+        if (empty) {
+            empty.textContent = emptyMessage
+            empty.classList.remove("hidden")
+        }
+        content?.classList.add("hidden")
+        return
+    }
+
+    if (title) {
+        const languageLabel = summary.language ? ` (${summary.language.toUpperCase()})` : ""
+        title.textContent = `${summary.title}${languageLabel}`
+    }
+    if (text) {
+        text.textContent = summary.extract || ""
+    }
+    if (link && summary.url) {
+        link.href = summary.url
+        link.classList.remove("hidden")
+    } else {
+        link?.classList.add("hidden")
+    }
+
+    empty?.classList.add("hidden")
+    content?.classList.remove("hidden")
 }
 
 async function deleteCurrentBook() {
