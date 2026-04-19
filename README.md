@@ -29,6 +29,21 @@ Na prática, o Flask organiza o projeto em duas frentes:
 1. páginas HTML server-side, como dashboard, detalhe do livro e grafo
 2. API JSON para livros, gêneros, tags, conexões, estatísticas e dados do grafo
 
+### Funções e recursos do Flask usados no projeto
+
+As partes principais do Flask usadas aqui são:
+
+- `Flask(__name__)` para criar a aplicação principal
+- `create_app()` para organizar a configuração no formato factory pattern
+- `@app.get(...)` para registrar as rotas HTML
+- `Blueprint(...)` para separar os endpoints da API por responsabilidade
+- `@books_bp.get(...)`, `@books_bp.post(...)`, `@books_bp.put(...)` e `@books_bp.delete(...)` para declarar rotas REST
+- `render_template(...)` para renderizar páginas com Jinja2
+- `request` para ler query params e payload JSON enviados pelo cliente
+- `jsonify(...)` para devolver respostas JSON padronizadas
+- `url_for(...)` nos templates para referenciar arquivos estáticos com segurança
+- `app.app_context()` para inicializar o banco e executar operações ligadas ao contexto da aplicação
+
 ## Tecnologias
 
 - Python 3.11+
